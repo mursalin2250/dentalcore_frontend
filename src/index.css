@@ -1,0 +1,144 @@
+@import "tailwindcss";
+
+/* Dark mode is class-based: <html class="dark"> */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ---- Theme tokens (extracted from the design sample) ---- */
+:root {
+  --background: #f6f6f9;
+  --surface: #ffffff;
+  --surface-muted: #f1f1f6;
+  --border: #e8e8f0;
+  --foreground: #14142b;
+  --muted-foreground: #6e6e85;
+  --primary: #6d4ae5;
+  --primary-soft: #f2eefe;
+  --primary-foreground: #ffffff;
+  --success: #16a34a;
+  --danger: #ef4444;
+  --warning: #f59e0b;
+  --info: #4d8df7;
+  /* Text/solid variants that meet contrast on surfaces */
+  --danger-text: #c62828;
+  --danger-solid: #c62828;
+}
+
+.dark {
+  --background: #0d0d14;
+  --surface: #15151f;
+  --surface-muted: #1c1c29;
+  --border: #272736;
+  --foreground: #ededf5;
+  --muted-foreground: #9494ab;
+  --primary: #8f73f5;
+  --primary-soft: #221c3d;
+  --primary-foreground: #0d0d14;
+  --success: #34d399;
+  --danger: #f87171;
+  --warning: #fbbf24;
+  --info: #7aa7f9;
+  --danger-text: #f87171;
+  --danger-solid: #dc2626;
+}
+
+/* Expose tokens as Tailwind utilities: bg-surface, text-muted-foreground, ... */
+@theme inline {
+  --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-surface-muted: var(--surface-muted);
+  --color-border: var(--border);
+  --color-foreground: var(--foreground);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-primary: var(--primary);
+  --color-primary-soft: var(--primary-soft);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-success: var(--success);
+  --color-danger: var(--danger);
+  --color-warning: var(--warning);
+  --color-info: var(--info);
+  --color-danger-text: var(--danger-text);
+  --color-danger-solid: var(--danger-solid);
+}
+
+@theme {
+  --font-sans: "Outfit Variable", ui-sans-serif, system-ui, sans-serif;
+
+  --shadow-card: 0 1px 2px rgb(16 16 40 / 0.05);
+  --shadow-sidebar: 0 8px 32px rgb(16 16 40 / 0.06);
+  --shadow-popover: 0 8px 24px rgb(16 16 40 / 0.1), 0 1px 2px rgb(16 16 40 / 0.06);
+
+  /* Stronger than the built-in curves */
+  --ease-out-strong: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
+
+  /* Page entrance: short and small, so it reads as polish rather than motion. */
+  --animate-rise: rise 420ms var(--ease-out-strong) backwards;
+  --animate-fade: fade 300ms ease-out backwards;
+  --animate-grow: grow 700ms var(--ease-out-strong) 180ms backwards;
+
+  @keyframes rise {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+  }
+  @keyframes fade {
+    from {
+      opacity: 0;
+    }
+  }
+  @keyframes grow {
+    from {
+      transform: scaleX(0);
+    }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-rise,
+  .animate-fade,
+  .animate-grow {
+    animation: none;
+  }
+}
+
+@layer base {
+  html {
+    color-scheme: light;
+  }
+  html.dark {
+    color-scheme: dark;
+  }
+  body {
+    background-color: var(--background);
+    color: var(--foreground);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+  /* Slim scrollbars that follow the theme (Firefox and Chrome 121+). */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: color-mix(in srgb, var(--muted-foreground) 35%, transparent) transparent;
+  }
+  /* Fallback for older WebKit browsers. */
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background-color: color-mix(in srgb, var(--muted-foreground) 35%, transparent);
+    border: 3px solid transparent;
+    border-radius: 9999px;
+    background-clip: padding-box;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background-color: color-mix(in srgb, var(--muted-foreground) 55%, transparent);
+  }
+  :focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+  }
+}
