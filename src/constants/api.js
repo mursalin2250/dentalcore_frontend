@@ -33,6 +33,16 @@ export const API_ENDPOINTS = Object.freeze({
   DOCTORS_STATS: "/doctors/stats",
   doctor: (id) => `/doctors/${id}`,
   doctorPatients: (id) => `/doctors/${id}/patients`,
+  APPOINTMENTS: "/appointments",
+  APPOINTMENTS_STATS: "/appointments/stats",
+  APPOINTMENTS_CALENDAR: "/appointments/calendar",
+  appointment: (id) => `/appointments/${id}`,
+  appointmentNotes: (id) => `/appointments/${id}/notes`,
+  MEDICATIONS: "/medications",
+  MEDICATIONS_STATS: "/medications/stats",
+  medication: (id) => `/medications/${id}`,
+  STOCK_MOVEMENTS: "/stock-movements",
+  STOCK_MOVEMENTS_STATS: "/stock-movements/stats",
 });
 
 export const API_MESSAGES = Object.freeze({

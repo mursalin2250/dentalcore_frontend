@@ -8,6 +8,12 @@ export function useForm({ initialValues, validate, onSubmit }) {
   const [formError, setFormError] = useState(""); // errors not tied to a field
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const reset = (next = initialValues) => {
+    setValues(next);
+    setErrors({});
+    setFormError("");
+  };
+
   const setValue = (name, value) => {
     setValues((current) => ({ ...current, [name]: value }));
     setErrors((current) => (current[name] ? { ...current, [name]: undefined } : current));
@@ -49,5 +55,5 @@ export function useForm({ initialValues, validate, onSubmit }) {
     }
   };
 
-  return { values, errors, formError, isSubmitting, setValue, getFieldProps, handleSubmit };
+  return { values, errors, formError, isSubmitting, setValue, reset, getFieldProps, handleSubmit };
 }

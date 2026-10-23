@@ -3,12 +3,12 @@ import { CURRENCY_MINOR_UNIT, JUST_NOW_LABEL, LOCALE, TIMEZONE } from "@/constan
 const numberFormat = new Intl.NumberFormat(LOCALE);
 const compactFormat = new Intl.NumberFormat(LOCALE, { notation: "compact", maximumFractionDigits: 1 });
 const timeFormat = new Intl.DateTimeFormat(LOCALE, { timeZone: TIMEZONE, hour: "numeric", minute: "2-digit" });
-const shortDateFormat = new Intl.DateTimeFormat(LOCALE, { timeZone: TIMEZONE, day: "numeric", month: "short" });
-const longDateFormat = new Intl.DateTimeFormat(LOCALE, {
+const shortDateFormat = new Intl.DateTimeFormat("en-GB", { timeZone: TIMEZONE, day: "2-digit", month: "2-digit", year: "numeric" });
+const longDateFormat = new Intl.DateTimeFormat("en-GB", {
   timeZone: TIMEZONE,
   weekday: "long",
-  day: "numeric",
-  month: "long",
+  day: "2-digit",
+  month: "2-digit",
   year: "numeric",
 });
 const dayKeyFormat = new Intl.DateTimeFormat("en-CA", { timeZone: TIMEZONE }); // YYYY-MM-DD
@@ -16,7 +16,7 @@ const hourFormat = new Intl.DateTimeFormat("en-US", { timeZone: TIMEZONE, hour: 
 const relativeFormat = new Intl.RelativeTimeFormat(LOCALE, { numeric: "auto" });
 
 // Chart labels come from API keys: "2026-10-20" (day) or "2026-10" (month). Read as UTC so they never shift.
-const bucketDayFormat = new Intl.DateTimeFormat(LOCALE, { timeZone: "UTC", day: "numeric", month: "short" });
+const bucketDayFormat = new Intl.DateTimeFormat("en-GB", { timeZone: "UTC", day: "2-digit", month: "2-digit", year: "numeric" });
 const bucketMonthFormat = new Intl.DateTimeFormat(LOCALE, { timeZone: "UTC", month: "short", year: "numeric" });
 
 const SECONDS = { HOUR: 3600, DAY: 86400 };
@@ -36,8 +36,26 @@ export function formatMoney(minorUnits, currency) {
 }
 
 export const formatTime = (iso) => timeFormat.format(new Date(iso));
-export const formatShortDate = (iso) => shortDateFormat.format(new Date(iso));
-export const formatLongDate = (date) => longDateFormat.format(date);
+
+/** Always dd/mm/yyyy (day → month → year). */
+export function formatShortDate(iso) {
+  if (!iso) return "";
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return "";
+  const parts = shortDateFormat.formatToParts(d);
+  const day = parts.find((p) => p.type === "day")?.value;
+  const month = parts.find((p) => p.type === "month")?.value;
+  const year = parts.find((p) => p.type === "year")?.value;
+  if (!day || !month || !year) return shortDateFormat.format(d);
+  return `${day}/${month}/${year}`;
+}
+
+export function formatLongDate(date) {
+  const d = date instanceof Date ? date : new Date(date);
+  if (Number.isNaN(d.getTime())) return "";
+  const weekday = new Intl.DateTimeFormat("en-GB", { timeZone: TIMEZONE, weekday: "long" }).format(d);
+  return `${weekday}, ${formatShortDate(d)}`;
+}
 export const isSameClinicDay = (a, b) => dayKeyFormat.format(new Date(a)) === dayKeyFormat.format(new Date(b));
 export const getClinicHour = (date) => Number(hourFormat.format(date)) % 24;
 
@@ -53,5 +71,5 @@ export function formatRelativeTime(iso, now = Date.now()) {
   if (abs < SECONDS.HOUR) return JUST_NOW_LABEL;
   if (abs < SECONDS.DAY) return relativeFormat.format(Math.round(seconds / SECONDS.HOUR), "hour");
   if (abs < RELATIVE_MAX_DAYS * SECONDS.DAY) return relativeFormat.format(Math.round(seconds / SECONDS.DAY), "day");
-  return shortDateFormat.format(new Date(iso));
+  return formatShortDate(iso);
 }

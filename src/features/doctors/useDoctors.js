@@ -11,7 +11,7 @@ const EMPTY_LIST = {
 
 const EMPTY_STATS = {
   total: 0,
-  specialties: 0,
+  active: 0,
   patientsAssigned: 0,
   appointmentsToday: 0,
 };

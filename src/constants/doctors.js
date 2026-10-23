@@ -1,4 +1,4 @@
-import { CalendarCheck, Stethoscope, UserPlus, Users } from "@phosphor-icons/react";
+import { CalendarCheck, Stethoscope, UserCheck, Users } from "@phosphor-icons/react";
 
 export const DOCTOR_PAGE_SIZE = 12;
 export const DOCTOR_PATIENTS_PAGE_SIZE = 10;
@@ -16,7 +16,7 @@ export const DOCTOR_DIALOGS = Object.freeze({
 
 export const DOCTOR_STAT_CARDS = [
   { key: "total", label: "Total Doctors", icon: Stethoscope, tone: "primary" },
-  { key: "specialties", label: "Specialties", icon: UserPlus, tone: "info" },
+  { key: "active", label: "Available Doctors", icon: UserCheck, tone: "info" },
   { key: "patientsAssigned", label: "Patients assigned", icon: Users, tone: "success" },
   { key: "appointmentsToday", label: "Appointments Today", icon: CalendarCheck, tone: "warning" },
 ];

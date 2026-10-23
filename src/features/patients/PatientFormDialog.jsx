@@ -4,6 +4,7 @@ import Button from "@/components/ui/Button";
 import Dialog from "@/components/ui/Dialog";
 import FormError from "@/components/ui/FormError";
 import SearchableSelect from "@/components/ui/SearchableSelect";
+import DateField from "@/components/ui/DateField";
 import SelectField from "@/components/ui/SelectField";
 import TextField from "@/components/ui/TextField";
 import { API_ENDPOINTS } from "@/constants/api";
@@ -156,7 +157,7 @@ function PatientForm({ patient, onSubmit, onCancel, doctorOptions }) {
         <TextField label="Full name" autoComplete="off" {...form.getFieldProps("name")} />
         <TextField label="Phone" type="tel" autoComplete="off" {...form.getFieldProps("phone")} />
         <TextField label="Email" type="email" autoComplete="off" {...form.getFieldProps("email")} />
-        <TextField label="Date of birth" type="date" {...form.getFieldProps("dateOfBirth")} />
+        <DateField label="Date of birth" {...form.getFieldProps("dateOfBirth")} />
         <SelectField label="Gender" options={GENDER_OPTIONS} {...form.getFieldProps("gender")} />
         <SelectField label="Blood type" options={BLOOD_TYPE_OPTIONS} {...form.getFieldProps("bloodType")} />
         <SelectField label="Status" options={STATUS_OPTIONS} {...form.getFieldProps("status")} />

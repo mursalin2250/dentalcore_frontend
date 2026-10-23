@@ -24,6 +24,7 @@ import { ROUTES } from "@/constants/routes";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { api } from "@/lib/api";
 import { downloadTextPdf } from "@/lib/downloadPdf";
+import AppointmentDetailsDialog from "@/features/appointments/AppointmentDetailsDialog";
 import { formatMoney, formatNumber, formatShortDate, formatTime } from "@/lib/format";
 import PatientFormDialog from "./PatientFormDialog";
 import PrescriptionFormDialog from "./PrescriptionFormDialog";
@@ -147,6 +148,7 @@ function AssignDoctorDialog({ open, currentDoctorId, onSubmit, onClose }) {
 }
 
 export default function PatientDetailsPage() {
+  const [selectedVisitId, setSelectedVisitId] = useState(null);
   const { id } = useParams();
   const { data, isLoading, error, reload, updatePatient, addPrescription } = usePatient(id);
   const [dialog, setDialog] = useState({ type: null });
@@ -397,7 +399,20 @@ export default function PatientDetailsPage() {
               </thead>
               <tbody>
                 {visits.map((visit) => (
-                  <tr key={visit.id} className="border-t border-border">
+                  <tr
+                    key={visit.id}
+                    className="cursor-pointer border-t border-border transition-colors hover:bg-surface-muted/50"
+                    onClick={() => setSelectedVisitId(visit.id)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        setSelectedVisitId(visit.id);
+                      }
+                    }}
+                    tabIndex={0}
+                    role="link"
+                    aria-label={`View visit on ${visit.startsAt ? formatShortDate(visit.startsAt) : "unknown date"}`}
+                  >
                     <td className="py-2.5 pr-3">
                       {visit.startsAt ? formatShortDate(visit.startsAt) : "—"}
                     </td>
@@ -406,7 +421,7 @@ export default function PatientDetailsPage() {
                     </td>
                     <td className="py-2.5 pr-3">{visit.doctor?.name || "—"}</td>
                     <td className="py-2.5 pr-3 text-muted-foreground">
-                      {visit.treatment || "—"}
+                      {visit.treatment || visit.reason || "—"}
                     </td>
                     <td className="py-2.5">
                       {APPOINTMENT_STATUS_LABELS[visit.status] || visit.status}
@@ -481,7 +496,13 @@ export default function PatientDetailsPage() {
         onClose={() => setDialog({ type: null })}
       />
 
-      <div className="sr-only" role="status" aria-live="polite">
+      <AppointmentDetailsDialog
+        open={Boolean(selectedVisitId)}
+        appointmentId={selectedVisitId}
+        onClose={() => setSelectedVisitId(null)}
+        showActions={false}
+      />
+            <div className="sr-only" role="status" aria-live="polite">
         {announcement}
       </div>
     </div>
