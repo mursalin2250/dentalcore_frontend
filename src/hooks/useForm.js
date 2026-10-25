@@ -46,10 +46,14 @@ export function useForm({ initialValues, validate, onSubmit }) {
     } catch (error) {
       // Field errors go under their inputs; anything else becomes a form-level message.
       const fieldErrors = error.fieldErrors ?? {};
-      const shown = Object.keys(fieldErrors).filter((name) => form.elements[name]);
+      const shown = Object.keys(fieldErrors).filter((name) => form.elements?.[name]);
       setErrors(fieldErrors);
-      if (shown.length > 0) form.elements[shown[0]].focus();
-      else setFormError(error.message);
+      if (shown.length > 0) {
+        form.elements[shown[0]]?.focus?.();
+      } else {
+        const detail = Object.values(fieldErrors).filter(Boolean).join(" ");
+        setFormError(detail || error.message || "Something went wrong.");
+      }
     } finally {
       setIsSubmitting(false);
     }

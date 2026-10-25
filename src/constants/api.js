@@ -43,6 +43,12 @@ export const API_ENDPOINTS = Object.freeze({
   medication: (id) => `/medications/${id}`,
   STOCK_MOVEMENTS: "/stock-movements",
   STOCK_MOVEMENTS_STATS: "/stock-movements/stats",
+  INVOICES: "/invoices",
+  INVOICES_STATS: "/invoices/stats",
+  invoice: (id) => `/invoices/${id}`,
+  invoicePayments: (id) => `/invoices/${id}/payments`,
+  invoicePaymentVoid: (id, paymentId) => `/invoices/${id}/payments/${paymentId}/void`,
+  invoiceByPatient: (patientId) => `/invoices/patient/${patientId}`,
 });
 
 export const API_MESSAGES = Object.freeze({

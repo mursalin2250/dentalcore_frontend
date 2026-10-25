@@ -72,10 +72,10 @@ export default function SelectField({
         {label}
       </label>
       <div className="relative">
+        <input type="hidden" name={name} value={value ?? ""} readOnly />
         <button
           type="button"
           id={id}
-          name={name}
           disabled={disabled}
           aria-haspopup="listbox"
           aria-expanded={open}
