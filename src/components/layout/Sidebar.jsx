@@ -10,21 +10,27 @@ const LINK_ACTIVE = "bg-primary-soft text-primary";
 const LINK_IDLE = "text-muted-foreground hover:bg-surface-muted hover:text-foreground";
 
 // Desktop: floating panel. Below lg: slide-in drawer controlled by `open`.
-export default function Sidebar({ open, onClose }) {
+export default function Sidebar({ open, onClose, forceOverlay = false }) {
   return (
     <>
       <div
         aria-hidden="true"
         onClick={onClose}
-        className={`fixed inset-0 z-40 bg-foreground/30 transition-opacity duration-200 ease-out motion-reduce:transition-none lg:hidden ${open ? "opacity-100" : "pointer-events-none opacity-0"}`}
+        className={`fixed inset-0 z-40 bg-foreground/30 transition-opacity duration-200 ease-out motion-reduce:transition-none ${forceOverlay ? "" : "lg:hidden"} ${open ? "opacity-100" : "pointer-events-none opacity-0"}`}
       />
 
       <aside
-        className={`fixed inset-y-3 left-3 z-50 flex w-64 flex-col rounded-2xl border border-border bg-surface shadow-sidebar transition-[transform,visibility] duration-250 ease-drawer motion-reduce:transition-none lg:sticky lg:inset-y-auto lg:top-3 lg:left-auto lg:my-3 lg:ml-3 lg:h-[calc(100dvh-1.5rem)] lg:shrink-0 lg:self-start lg:visible lg:translate-x-0 ${open ? "visible translate-x-0" : "invisible -translate-x-[calc(100%+1rem)]"}`}
+        className={`fixed inset-y-3 left-3 z-50 flex w-64 flex-col rounded-2xl border border-border bg-surface shadow-sidebar transition-[transform,visibility] duration-250 ease-drawer motion-reduce:transition-none ${
+          forceOverlay
+            ? open
+              ? "visible translate-x-0"
+              : "invisible -translate-x-[calc(100%+1rem)]"
+            : `lg:sticky lg:inset-y-auto lg:top-3 lg:left-auto lg:my-3 lg:ml-3 lg:h-[calc(100dvh-1.5rem)] lg:shrink-0 lg:self-start lg:visible lg:translate-x-0 ${open ? "visible translate-x-0" : "invisible -translate-x-[calc(100%+1rem)]"}`
+        }`}
       >
         <div className="flex items-center justify-between px-5 pb-5 pt-6">
           <Logo onClick={onClose} />
-          <IconButton label="Close navigation" onClick={onClose} className="lg:hidden">
+          <IconButton label="Close navigation" onClick={onClose} className={forceOverlay ? "" : "lg:hidden"}>
             <X />
           </IconButton>
         </div>

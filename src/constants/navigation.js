@@ -2,7 +2,6 @@ import {
   ArrowsLeftRight,
   CalendarCheck,
   ChartLineUp,
-  CreditCard,
   GearSix,
   IdentificationBadge,
   Pill,
@@ -41,7 +40,6 @@ export const NAV_GROUPS = [
   {
     label: "Operation",
     items: [
-      { label: "Billing", path: ROUTES.BILLING, icon: CreditCard },
       { label: "Invoice", path: ROUTES.INVOICE, icon: Receipt },
       { label: "Analytics", path: ROUTES.ANALYTICS, icon: ChartLineUp },
       { label: "Staff", path: ROUTES.STAFF, icon: IdentificationBadge },

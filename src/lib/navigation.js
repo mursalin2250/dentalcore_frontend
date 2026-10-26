@@ -17,6 +17,13 @@ export function getPageMeta(pathname) {
     return { group: "Care / Doctors", title: "Details" };
   }
 
+  if (pathname === "/invoice/new") {
+    return { group: "Operation / Invoice", title: "Create invoice" };
+  }
+  if (pathname.startsWith("/invoice/") && pathname.endsWith("/edit")) {
+    return { group: "Operation / Invoice", title: "Edit invoice" };
+  }
+
   const menuItem = USER_MENU_ITEMS.find((i) => i.path === pathname);
   return menuItem ? { group: null, title: menuItem.label } : null;
 }

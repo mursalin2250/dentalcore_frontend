@@ -1,8 +1,7 @@
 import { useId } from "react";
 
-// Subtle default border; soft accent ring on focus (matches light + dark).
 export const INPUT_CLASS =
-  "h-10 w-full rounded-lg border bg-surface px-3 text-base text-foreground placeholder:text-muted-foreground transition-[border-color,box-shadow] duration-150 hover:border-muted-foreground/30 focus-visible:border-primary/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20 sm:text-sm";
+  "h-10 w-full rounded-lg border bg-surface px-3 text-base text-foreground placeholder:text-muted-foreground transition-colors duration-150 focus-visible:border-primary focus-visible:outline-offset-0 sm:text-sm";
 
 // Label + input + inline error/hint, wired together with aria attributes.
 export default function TextField({ label, error, hint, endAdornment, className = "", ...props }) {
@@ -20,7 +19,7 @@ export default function TextField({ label, error, hint, endAdornment, className 
           id={id}
           aria-invalid={Boolean(error)}
           aria-describedby={message ? messageId : undefined}
-          className={`${INPUT_CLASS} ${error ? "border-danger focus-visible:ring-danger/20" : "border-border"} ${endAdornment ? "pr-11" : ""}`}
+          className={`${INPUT_CLASS} ${error ? "border-danger" : "border-border"} ${endAdornment ? "pr-11" : ""}`}
           {...props}
         />
         {endAdornment && (

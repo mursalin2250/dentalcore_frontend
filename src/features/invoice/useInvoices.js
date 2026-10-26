@@ -1,57 +1,44 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { API_ENDPOINTS, HTTP_METHODS } from "@/constants/api";
-import { FILTER_ALL, INVOICE_PAGE_SIZE } from "@/constants/billing";
 import { api } from "@/lib/api";
 
-const EMPTY_LIST = {
-  invoices: [],
-  pagination: { page: 1, limit: INVOICE_PAGE_SIZE, total: 0, totalPages: 1 },
-};
-const EMPTY_STATS = {
-  total: 0,
-  pending: 0,
-  paid: 0,
-  overdue: 0,
-  cancelled: 0,
-  outstanding: 0,
-  collected: 0,
-};
-
-export function useInvoices({ search, status, page }) {
-  const [data, setData] = useState(EMPTY_LIST);
-  const [stats, setStats] = useState(EMPTY_STATS);
+export function useInvoices({ search = "", status = "", page = 1, limit = 12 } = {}) {
+  const [invoices, setInvoices] = useState([]);
+  const [pagination, setPagination] = useState({ page: 1, limit, total: 0, pages: 1 });
+  const [stats, setStats] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [statsLoading, setStatsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [reloadKey, setReloadKey] = useState(0);
-  const silent = useRef(false);
+
+  const reload = useCallback(() => setReloadKey((k) => k + 1), []);
 
   useEffect(() => {
     const c = new AbortController();
-    if (!silent.current) setIsLoading(true);
+    setIsLoading(true);
     setError(null);
     api(API_ENDPOINTS.INVOICES, {
       params: {
         search: search || undefined,
-        status: status === FILTER_ALL ? undefined : status,
+        status: status && status !== "all" ? status : undefined,
         page,
-        limit: INVOICE_PAGE_SIZE,
+        limit,
         sort: "-updatedAt",
       },
       signal: c.signal,
     })
-      .then(setData)
+      .then((data) => {
+        setInvoices(data.invoices || []);
+        setPagination(data.pagination || { page, limit, total: 0, pages: 1 });
+      })
       .catch((e) => {
         if (e.name !== "AbortError") setError(e);
       })
       .finally(() => {
-        if (!c.signal.aborted) {
-          setIsLoading(false);
-          silent.current = false;
-        }
+        if (!c.signal.aborted) setIsLoading(false);
       });
     return () => c.abort();
-  }, [search, status, page, reloadKey]);
+  }, [search, status, page, limit, reloadKey]);
 
   useEffect(() => {
     const c = new AbortController();
@@ -65,57 +52,40 @@ export function useInvoices({ search, status, page }) {
     return () => c.abort();
   }, [reloadKey]);
 
-  const reload = useCallback(() => setReloadKey((k) => k + 1), []);
-  const refresh = useCallback(() => {
-    silent.current = true;
+  const createInvoice = async (body) => {
+    const data = await api(API_ENDPOINTS.INVOICES, { method: HTTP_METHODS.POST, body });
     reload();
-  }, [reload]);
+    return data.invoice;
+  };
 
-  const createInvoice = useCallback(
-    async (values) => {
-      const r = await api(API_ENDPOINTS.INVOICES, { method: HTTP_METHODS.POST, body: values });
-      refresh();
-      return r;
-    },
-    [refresh],
-  );
-  const updateInvoice = useCallback(
-    async (id, values) => {
-      const r = await api(API_ENDPOINTS.invoice(id), { method: HTTP_METHODS.PATCH, body: values });
-      refresh();
-      return r;
-    },
-    [refresh],
-  );
-  const addPayment = useCallback(
-    async (id, values) => {
-      const r = await api(API_ENDPOINTS.invoicePayments(id), { method: HTTP_METHODS.POST, body: values });
-      refresh();
-      return r;
-    },
-    [refresh],
-  );
-  const removeInvoice = useCallback(
-    async (id) => {
-      const r = await api(API_ENDPOINTS.invoice(id), { method: HTTP_METHODS.DELETE });
-      refresh();
-      return r;
-    },
-    [refresh],
-  );
+  const updateInvoice = async (id, body) => {
+    const data = await api(API_ENDPOINTS.invoice(id), { method: HTTP_METHODS.PATCH, body });
+    reload();
+    return data.invoice;
+  };
+
+  const deleteInvoice = async (id) => {
+    await api(API_ENDPOINTS.invoice(id), { method: HTTP_METHODS.DELETE });
+    reload();
+  };
+
+  const addPayment = async (id, body) => {
+    const data = await api(API_ENDPOINTS.invoicePayments(id), { method: HTTP_METHODS.POST, body });
+    reload();
+    return data.invoice;
+  };
 
   return {
-    invoices: data.invoices,
-    pagination: data.pagination,
+    invoices,
+    pagination,
     stats,
     isLoading,
     statsLoading,
     error,
     reload,
-    refresh,
     createInvoice,
     updateInvoice,
+    deleteInvoice,
     addPayment,
-    removeInvoice,
   };
 }

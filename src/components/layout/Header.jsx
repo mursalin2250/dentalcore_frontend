@@ -5,21 +5,25 @@ import ThemeToggle from "./ThemeToggle";
 import UserMenu from "./UserMenu";
 import { getPageMeta } from "@/lib/navigation";
 
-export default function Header({ onOpenNav }) {
+export default function Header({ onOpenNav, focusMode = false }) {
   const meta = getPageMeta(useLocation().pathname);
 
   return (
     <header className="sticky top-0 z-30 flex h-16 items-center justify-between gap-4 bg-background/80 px-4 backdrop-blur sm:px-6 lg:px-8">
       <div className="flex min-w-0 items-center gap-3">
-        <IconButton label="Open navigation" onClick={onOpenNav} className="lg:hidden">
-          <List />
-        </IconButton>
+        {!focusMode && (
+          <IconButton label="Open navigation" onClick={onOpenNav} className="lg:hidden">
+            <List />
+          </IconButton>
+        )}
         {meta && (
           <p className="truncate text-sm text-muted-foreground">
             {meta.group && (
               <>
                 {meta.group}
-                <span aria-hidden="true" className="mx-2">/</span>
+                <span aria-hidden="true" className="mx-2">
+                  /
+                </span>
               </>
             )}
             <span className="font-medium text-foreground">{meta.title}</span>
@@ -30,6 +34,11 @@ export default function Header({ onOpenNav }) {
       <div className="flex items-center gap-3">
         <ThemeToggle />
         <UserMenu />
+        {focusMode && (
+          <IconButton label="Open navigation" onClick={onOpenNav}>
+            <List />
+          </IconButton>
+        )}
       </div>
     </header>
   );

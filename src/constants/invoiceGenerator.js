@@ -1,0 +1,50 @@
+import { CLINIC_DEFAULTS } from "./billingShared";
+
+export { CLINIC_DEFAULTS };
+
+export const GENERATOR_TEXT = Object.freeze({
+  TITLE: "Create invoice",
+  EDIT_TITLE: "Edit invoice",
+  INVOICE_LABEL: "INVOICE",
+  UPLOAD_LOGO: "Upload",
+  LOGO_HINT: "240 × 240 px · max 1 MB",
+  BILL_TO: "Bill To",
+  INVOICE_NO: "Invoice #",
+  INVOICE_DATE: "Invoice date",
+  DUE_DATE: "Due date",
+  ITEM_DESCRIPTION: "Treatment",
+  QTY: "Qty",
+  RATE: "Rate",
+  TAX: "Tax %",
+  LINE_TOTAL: "Total",
+  AMOUNT: "Amount",
+  ADD_LINE: "Add line item",
+  SUB_TOTAL: "Sub total",
+  TAX_LABEL: "Tax",
+  DISCOUNT: "Discount",
+  TOTAL: "Total",
+  NOTES: "Notes",
+  TERMS: "Terms & conditions",
+  SAVE: "Save invoice",
+  PRINT: "Print",
+  DOWNLOAD: "Download PDF",
+  PREVIEW: "Preview",
+  FORM: "Edit",
+  PATIENT: "Patient",
+  SELECT_PATIENT: "Select patient",
+  REMOVE_LINE: "Remove line",
+  TAX_TOGGLE: "Include tax",
+  PLACEHOLDER_ITEM: "Enter treatment name",
+  PLACEHOLDER_NOTES: "Notes for the patient…",
+  PLACEHOLDER_TERMS: "Payment terms and conditions…",
+  SAVED: "Invoice saved.",
+  REQUIRED_PATIENT: "Enter a patient name.",
+  REQUIRED_ITEM: "Add at least one line item with a description.",
+});
+
+export const EMPTY_LINE = () => ({
+  key: `line-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+  description: "",
+  quantity: 1,
+  rateTaka: "",
+});

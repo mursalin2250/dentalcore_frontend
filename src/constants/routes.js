@@ -15,8 +15,9 @@ export const ROUTES = Object.freeze({
   MEDICATIONS: "/medications",
   STOCK_MOVEMENT: "/stock-movement",
 
-  BILLING: "/billing",
   INVOICE: "/invoice",
+  INVOICE_NEW: "/invoice/new",
+  INVOICE_EDIT: "/invoice/:id/edit",
   ANALYTICS: "/analytics",
   STAFF: "/staff",
 

@@ -6,7 +6,6 @@ const TONES = {
   success: "bg-success/10 text-success",
   warning: "bg-warning/10 text-warning",
   info: "bg-info/10 text-info",
-  danger: "bg-danger/10 text-danger",
 };
 
 export default function StatCard({ label, subtitle, value, icon: Icon, tone = "primary", isLoading, index = 0 }) {

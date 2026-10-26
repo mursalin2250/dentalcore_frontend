@@ -148,10 +148,9 @@ export const PATIENT_TEXT = Object.freeze({
 });
 
 export const APPOINTMENT_STATUS_LABELS = Object.freeze({
-  pending: "Pending",
-  confirmed: "Confirmed",
+  scheduled: "Scheduled",
+  in_chair: "In chair",
   completed: "Completed",
   cancelled: "Cancelled",
   no_show: "No show",
-  rescheduled: "Rescheduled",
 });

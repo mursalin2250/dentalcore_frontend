@@ -3,8 +3,6 @@ import Avatar from "@/components/ui/Avatar";
 import Button from "@/components/ui/Button";
 import Dialog from "@/components/ui/Dialog";
 import FormError from "@/components/ui/FormError";
-import SearchableSelect from "@/components/ui/SearchableSelect";
-import DateField from "@/components/ui/DateField";
 import SelectField from "@/components/ui/SelectField";
 import TextField from "@/components/ui/TextField";
 import { API_ENDPOINTS } from "@/constants/api";
@@ -157,7 +155,7 @@ function PatientForm({ patient, onSubmit, onCancel, doctorOptions }) {
         <TextField label="Full name" autoComplete="off" {...form.getFieldProps("name")} />
         <TextField label="Phone" type="tel" autoComplete="off" {...form.getFieldProps("phone")} />
         <TextField label="Email" type="email" autoComplete="off" {...form.getFieldProps("email")} />
-        <DateField label="Date of birth" {...form.getFieldProps("dateOfBirth")} />
+        <TextField label="Date of birth" type="date" {...form.getFieldProps("dateOfBirth")} />
         <SelectField label="Gender" options={GENDER_OPTIONS} {...form.getFieldProps("gender")} />
         <SelectField label="Blood type" options={BLOOD_TYPE_OPTIONS} {...form.getFieldProps("bloodType")} />
         <SelectField label="Status" options={STATUS_OPTIONS} {...form.getFieldProps("status")} />
@@ -182,13 +180,10 @@ function PatientForm({ patient, onSubmit, onCancel, doctorOptions }) {
           </div>
           {photoError && <p className="mt-1.5 text-sm text-danger-text">{photoError}</p>}
         </div>
-        <SearchableSelect
+        <SelectField
           label={PATIENT_TEXT.DOCTOR}
           options={doctorOptions}
-          value={form.values.doctor}
-          onChange={(v) => form.setValue("doctor", v)}
-          error={form.errors.doctor}
-          placeholder={PATIENT_TEXT.NO_DOCTOR_OPTION}
+          {...form.getFieldProps("doctor")}
         />
       </div>
 
@@ -270,7 +265,7 @@ export default function PatientFormDialog({ open, patient, onSubmit, onClose }) 
   useEffect(() => {
     if (!open) return undefined;
     const controller = new AbortController();
-    api(`${API_ENDPOINTS.DOCTORS}?limit=50`, { signal: controller.signal })
+    api(API_ENDPOINTS.DOCTORS, { signal: controller.signal })
       .then((data) => {
         const options = (data.doctors || []).map((d) => ({
           value: d.id,

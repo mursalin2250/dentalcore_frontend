@@ -8,7 +8,6 @@ import Dialog from "@/components/ui/Dialog";
 import EmptyState from "@/components/ui/EmptyState";
 import FormError from "@/components/ui/FormError";
 import PageLoader from "@/components/ui/PageLoader";
-import SearchableSelect from "@/components/ui/SearchableSelect";
 import SelectField from "@/components/ui/SelectField";
 import { API_ENDPOINTS } from "@/constants/api";
 import {
@@ -24,7 +23,6 @@ import { ROUTES } from "@/constants/routes";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { api } from "@/lib/api";
 import { downloadTextPdf } from "@/lib/downloadPdf";
-import AppointmentDetailsDialog from "@/features/appointments/AppointmentDetailsDialog";
 import { formatMoney, formatNumber, formatShortDate, formatTime } from "@/lib/format";
 import PatientFormDialog from "./PatientFormDialog";
 import PrescriptionFormDialog from "./PrescriptionFormDialog";
@@ -91,7 +89,7 @@ function AssignDoctorDialog({ open, currentDoctorId, onSubmit, onClose }) {
     setDoctorId(currentDoctorId || "");
     setError("");
     const controller = new AbortController();
-    api(`${API_ENDPOINTS.DOCTORS}?limit=50`, { signal: controller.signal })
+    api(API_ENDPOINTS.DOCTORS, { signal: controller.signal })
       .then((data) => {
         const list = (data.doctors || []).map((d) => ({
           value: d.id,
@@ -126,12 +124,11 @@ function AssignDoctorDialog({ open, currentDoctorId, onSubmit, onClose }) {
       className="max-w-md"
     >
       <form onSubmit={handleSubmit} className="space-y-4">
-        <SearchableSelect
+        <SelectField
           label={PATIENT_TEXT.DOCTOR}
           options={options}
           value={doctorId}
-          onChange={setDoctorId}
-          placeholder={PATIENT_TEXT.NO_DOCTOR_OPTION}
+          onChange={(e) => setDoctorId(e.target.value)}
         />
         {error && <FormError>{error}</FormError>}
         <div className="flex justify-end gap-2">
@@ -148,7 +145,6 @@ function AssignDoctorDialog({ open, currentDoctorId, onSubmit, onClose }) {
 }
 
 export default function PatientDetailsPage() {
-  const [selectedVisitId, setSelectedVisitId] = useState(null);
   const { id } = useParams();
   const { data, isLoading, error, reload, updatePatient, addPrescription } = usePatient(id);
   const [dialog, setDialog] = useState({ type: null });
@@ -274,14 +270,8 @@ export default function PatientDetailsPage() {
               <Avatar name={doctor.name} src={doctor.avatarUrl} className="size-20 text-lg" />
               <p className="mt-3 text-base font-semibold tracking-tight">{doctor.name}</p>
               <p className="mt-1 text-sm text-muted-foreground">
-                {[doctor.title, doctor.specialty].filter(Boolean).join(" · ") || doctor.specialty || "Doctor"}
+                {[doctor.title, doctor.specialty].filter(Boolean).join(" · ") || "Doctor"}
               </p>
-              {doctor.phone ? (
-                <p className="mt-2 text-sm text-muted-foreground">{doctor.phone}</p>
-              ) : null}
-              {doctor.email ? (
-                <p className="mt-0.5 break-all text-sm text-muted-foreground">{doctor.email}</p>
-              ) : null}
               <div className="mt-5 flex w-full flex-col gap-2">
                 <Link to={ROUTES.DOCTOR_DETAILS.replace(":id", doctor.id)} className="w-full">
                   <Button variant="secondary" className="w-full">
@@ -399,20 +389,7 @@ export default function PatientDetailsPage() {
               </thead>
               <tbody>
                 {visits.map((visit) => (
-                  <tr
-                    key={visit.id}
-                    className="cursor-pointer border-t border-border transition-colors hover:bg-surface-muted/50"
-                    onClick={() => setSelectedVisitId(visit.id)}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter" || e.key === " ") {
-                        e.preventDefault();
-                        setSelectedVisitId(visit.id);
-                      }
-                    }}
-                    tabIndex={0}
-                    role="link"
-                    aria-label={`View visit on ${visit.startsAt ? formatShortDate(visit.startsAt) : "unknown date"}`}
-                  >
+                  <tr key={visit.id} className="border-t border-border">
                     <td className="py-2.5 pr-3">
                       {visit.startsAt ? formatShortDate(visit.startsAt) : "—"}
                     </td>
@@ -421,7 +398,7 @@ export default function PatientDetailsPage() {
                     </td>
                     <td className="py-2.5 pr-3">{visit.doctor?.name || "—"}</td>
                     <td className="py-2.5 pr-3 text-muted-foreground">
-                      {visit.treatment || visit.reason || "—"}
+                      {visit.treatment || "—"}
                     </td>
                     <td className="py-2.5">
                       {APPOINTMENT_STATUS_LABELS[visit.status] || visit.status}
@@ -496,13 +473,7 @@ export default function PatientDetailsPage() {
         onClose={() => setDialog({ type: null })}
       />
 
-      <AppointmentDetailsDialog
-        open={Boolean(selectedVisitId)}
-        appointmentId={selectedVisitId}
-        onClose={() => setSelectedVisitId(null)}
-        showActions={false}
-      />
-            <div className="sr-only" role="status" aria-live="polite">
+      <div className="sr-only" role="status" aria-live="polite">
         {announcement}
       </div>
     </div>

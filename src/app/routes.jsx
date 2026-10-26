@@ -12,8 +12,8 @@ import DoctorDetailsPage from "@/features/doctors/DoctorDetailsPage";
 import AppointmentsPage from "@/features/appointments/AppointmentsPage";
 import MedicationsPage from "@/features/medications/MedicationsPage";
 import StockMovementPage from "@/features/stock-movement/StockMovementPage";
-import BillingPage from "@/features/billing/BillingPage";
 import InvoicePage from "@/features/invoice/InvoicePage";
+import InvoiceGeneratorPage from "@/features/invoice/InvoiceGeneratorPage";
 import AnalyticsPage from "@/features/analytics/AnalyticsPage";
 import StaffPage from "@/features/staff/StaffPage";
 import TeamPage from "@/features/team/TeamPage";
@@ -46,8 +46,9 @@ export const routes = [
           { path: ROUTES.APPOINTMENTS, element: <AppointmentsPage /> },
           { path: ROUTES.MEDICATIONS, element: <MedicationsPage /> },
           { path: ROUTES.STOCK_MOVEMENT, element: <StockMovementPage /> },
-          { path: ROUTES.BILLING, element: <BillingPage /> },
           { path: ROUTES.INVOICE, element: <InvoicePage /> },
+          { path: ROUTES.INVOICE_NEW, element: <InvoiceGeneratorPage /> },
+          { path: ROUTES.INVOICE_EDIT, element: <InvoiceGeneratorPage /> },
           { path: ROUTES.ANALYTICS, element: <AnalyticsPage /> },
           { path: ROUTES.STAFF, element: <StaffPage /> },
           { path: ROUTES.TEAM, element: <TeamPage /> },

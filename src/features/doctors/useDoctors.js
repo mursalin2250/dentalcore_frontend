@@ -11,7 +11,7 @@ const EMPTY_LIST = {
 
 const EMPTY_STATS = {
   total: 0,
-  active: 0,
+  specialties: 0,
   patientsAssigned: 0,
   appointmentsToday: 0,
 };
@@ -151,9 +151,5 @@ export function useDoctor(id) {
     [id],
   );
 
-  const removeDoctor = useCallback(async () => {
-    await api(API_ENDPOINTS.doctor(id), { method: HTTP_METHODS.DELETE });
-  }, [id]);
-
-  return { data, isLoading, error, reload, updateDoctor, removeDoctor };
+  return { data, isLoading, error, reload, updateDoctor };
 }
