@@ -6,6 +6,7 @@ import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { IconContext } from "@phosphor-icons/react";
 import { routes } from "@/app/routes";
 import { AuthProvider } from "@/features/auth/AuthContext";
+import ErrorBoundary from "@/components/ErrorBoundary";
 import { ICON_DEFAULTS } from "@/constants/ui";
 
 const router = createBrowserRouter(routes);
@@ -14,7 +15,9 @@ createRoot(document.getElementById("root")).render(
   <StrictMode>
     <IconContext.Provider value={ICON_DEFAULTS}>
       <AuthProvider>
-        <RouterProvider router={router} />
+        <ErrorBoundary>
+          <RouterProvider router={router} />
+        </ErrorBoundary>
       </AuthProvider>
     </IconContext.Provider>
   </StrictMode>,

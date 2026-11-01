@@ -118,6 +118,7 @@ export const PATIENT_TEXT = Object.freeze({
   NO_PAYMENTS: "No payments recorded yet.",
   NO_PRESCRIPTIONS: "No prescriptions on file yet.",
   PRINT: "Print PDF",
+  RECORD_PAYMENT: "Record payment",
   EDIT: "Edit patient",
   ADD: "Add patient",
   VIEW_DETAILS: "View details",

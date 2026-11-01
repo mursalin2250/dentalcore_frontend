@@ -1,16 +1,15 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import {
-  MagnifyingGlass,
+import {MagnifyingGlass,
   PencilSimple,
   Plus,
   Printer,
   Trash,
-  WarningCircle,
-} from "@phosphor-icons/react";
+  WarningCircle, Wallet} from "@phosphor-icons/react";
 import Badge from "@/components/ui/Badge";
 import Button from "@/components/ui/Button";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
+import DateField from "@/components/ui/DateField";
 import Dialog from "@/components/ui/Dialog";
 import EmptyState from "@/components/ui/EmptyState";
 import FormError from "@/components/ui/FormError";
@@ -37,15 +36,13 @@ import { useInvoices } from "@/features/invoice/useInvoices";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 import { useForm } from "@/hooks/useForm";
 import { usePageTitle } from "@/hooks/usePageTitle";
-import { formatMoney, formatShortDate } from "@/lib/format";
+import { formatMoney, formatShortDate, takaToMinor, minorToTaka } from "@/lib/format";
 import { printInvoice } from "@/lib/printInvoice";
 
-const minorToTaka = (v) => (Number(v) || 0) / CURRENCY_MINOR_UNIT;
-const takaToMinor = (v) => Math.round((Number(v) || 0) * CURRENCY_MINOR_UNIT);
 
 function PaymentFormDialog({ open, invoice, onClose, onSubmit }) {
   const form = useForm({
-    initialValues: { amount: "", method: "cash", note: "" },
+    initialValues: { amount: "", method: "cash", note: "", paidAt: "" },
     validate: (v) => {
       const e = {};
       if (!v.amount || Number(v.amount) <= 0) e.amount = "Enter an amount.";
@@ -59,6 +56,7 @@ function PaymentFormDialog({ open, invoice, onClose, onSubmit }) {
         amount: takaToMinor(values.amount),
         method: values.method || "cash",
         note: values.note?.trim() || "",
+        paidAt: values.paidAt || undefined,
       });
       onClose();
     },
@@ -71,6 +69,7 @@ function PaymentFormDialog({ open, invoice, onClose, onSubmit }) {
       amount: dueTaka > 0 ? String(dueTaka) : "",
       method: "cash",
       note: "",
+      paidAt: "",
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, invoice?.id, invoice?.amountDue]);
@@ -92,6 +91,7 @@ function PaymentFormDialog({ open, invoice, onClose, onSubmit }) {
           options={PAYMENT_METHOD_OPTIONS}
           {...form.getFieldProps("method")}
         />
+        <DateField label="Payment date" {...form.getFieldProps("paidAt")} />
         <TextField label="Note" {...form.getFieldProps("note")} />
         {form.formError && <FormError>{form.formError}</FormError>}
         <div className="flex justify-end gap-2 pt-2">
@@ -349,6 +349,18 @@ export default function InvoicePage() {
                     </td>
                     <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
                       <div className="flex items-center gap-1">
+                        {row.status !== "cancelled" && Number(row.amountDue) > 0 && (
+                          <IconButton
+                            label="Record payment"
+                            className="size-8"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setDialog({ type: INVOICE_DIALOGS.PAYMENT, invoice: row });
+                            }}
+                          >
+                            <Wallet className="size-4" />
+                          </IconButton>
+                        )}
                         <IconButton label="Print" className="size-8" onClick={() => printInvoice(row)}>
                           <Printer className="size-4" />
                         </IconButton>

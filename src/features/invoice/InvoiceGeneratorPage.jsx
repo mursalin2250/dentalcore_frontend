@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Image as ImageIcon, Plus, Printer, Trash } from "@phosphor-icons/react";
+import { Plus, Printer, Tooth, Trash } from "@phosphor-icons/react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import Button from "@/components/ui/Button";
 import DateField from "@/components/ui/DateField";
@@ -10,12 +10,10 @@ import { CURRENCY, CURRENCY_MINOR_UNIT } from "@/constants/locale";
 import { ROUTES } from "@/constants/routes";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { api } from "@/lib/api";
-import { formatMoney, formatShortDate } from "@/lib/format";
+import { formatMoney, formatShortDate, takaToMinor, minorToTaka } from "@/lib/format";
 import { computeInvoiceTotals, lineSubtotal } from "@/lib/invoiceTotals";
 import { buildInvoicePrintHtml, printInvoiceHtml } from "@/lib/printInvoice";
 
-const takaToMinor = (v) => Math.round((Number(v) || 0) * CURRENCY_MINOR_UNIT);
-const minorToTaka = (v) => (Number(v) || 0) / CURRENCY_MINOR_UNIT;
 
 function todayIso() {
   const d = new Date();
@@ -325,16 +323,16 @@ export default function InvoiceGeneratorPage() {
         <button
           type="button"
           onClick={() => fileRef.current?.click()}
-          className="grid size-20 place-items-center overflow-hidden rounded-lg border border-dashed border-border bg-surface-muted text-muted-foreground hover:border-primary hover:text-primary"
-          aria-label="Upload logo"
+          className="grid size-20 place-items-center overflow-hidden rounded-lg border border-border bg-surface text-primary-foreground hover:border-primary"
+          aria-label="Clinic logo"
+          title="Click to replace logo"
         >
           {logoDataUrl ? (
             <img src={logoDataUrl} alt="" className="size-full object-contain" />
           ) : (
-            <div className="text-center">
-              <ImageIcon className="mx-auto size-6" />
-              <span className="mt-1 block text-[10px]">Upload</span>
-            </div>
+            <span className="grid size-14 place-items-center rounded-lg bg-primary text-primary-foreground">
+              <Tooth weight="fill" size={28} />
+            </span>
           )}
         </button>
         <input
@@ -532,11 +530,20 @@ export default function InvoiceGeneratorPage() {
   const preview = (
     <div className="rounded-xl border border-border bg-white p-6 text-[#14142b] shadow-card sm:p-8">
       <div className="flex justify-between gap-4">
-        <div>
+        <div className="flex items-start gap-3">
+          {logoDataUrl ? (
+            <img src={logoDataUrl} alt="" className="size-10 rounded-lg object-contain" />
+          ) : (
+            <span className="grid size-10 shrink-0 place-items-center rounded-lg bg-primary text-primary-foreground">
+              <Tooth weight="fill" size={22} />
+            </span>
+          )}
+          <div>
           <p className="font-semibold">{clinicName}</p>
           <p className="text-sm text-[#6e6e85]">{clinicContact}</p>
           <p className="text-sm text-[#6e6e85]">{clinicAddress}</p>
           <p className="text-sm text-[#6e6e85]">{clinicCity}</p>
+          </div>
         </div>
         <h2 className="text-3xl font-semibold tracking-wide">INVOICE</h2>
       </div>

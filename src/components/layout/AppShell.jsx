@@ -2,13 +2,13 @@ import { useCallback, useEffect, useState } from "react";
 import { Link, Outlet, useLocation } from "react-router-dom";
 import { List } from "@phosphor-icons/react";
 import IconButton from "@/components/ui/IconButton";
+import Logo from "@/components/ui/Logo";
 import Header from "./Header";
 import Sidebar from "./Sidebar";
 import ThemeToggle from "./ThemeToggle";
 import UserMenu from "./UserMenu";
 import { useDismiss } from "@/hooks/useDismiss";
 import { getPageMeta } from "@/lib/navigation";
-import { ROUTES } from "@/constants/routes";
 import { BRAND_NAME, MAIN_CONTENT_ID } from "@/constants/ui";
 
 function isInvoiceFocusPath(pathname) {
@@ -45,12 +45,7 @@ export default function AppShell() {
       <div className="flex min-w-0 flex-1 flex-col">
         {focusMode ? (
           <header className="sticky top-0 z-30 flex h-16 items-center justify-between gap-4 bg-background/80 px-4 backdrop-blur sm:px-6 lg:px-8">
-            <Link to={ROUTES.DASHBOARD} className="flex items-center gap-2 font-semibold tracking-tight">
-              <span className="grid size-8 place-items-center rounded-lg bg-primary text-sm text-primary-foreground">
-                DC
-              </span>
-              <span className="hidden sm:inline">{BRAND_NAME}</span>
-            </Link>
+            <Logo />
             <div className="flex items-center gap-3">
               <ThemeToggle />
               <UserMenu />

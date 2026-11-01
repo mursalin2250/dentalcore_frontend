@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { ArrowLeft, Plus, Printer, WarningCircle } from "@phosphor-icons/react";
+import { ArrowLeft, Plus, WarningCircle } from "@phosphor-icons/react";
 import { Link, useParams } from "react-router-dom";
 import Avatar from "@/components/ui/Avatar";
 import Badge from "@/components/ui/Badge";
@@ -8,8 +8,11 @@ import Dialog from "@/components/ui/Dialog";
 import EmptyState from "@/components/ui/EmptyState";
 import FormError from "@/components/ui/FormError";
 import PageLoader from "@/components/ui/PageLoader";
+import DateField from "@/components/ui/DateField";
 import SelectField from "@/components/ui/SelectField";
-import { API_ENDPOINTS } from "@/constants/api";
+import { API_ENDPOINTS, HTTP_METHODS } from "@/constants/api";
+import { PAYMENT_METHOD_OPTIONS } from "@/constants/billing";
+import { CURRENCY } from "@/constants/locale";
 import {
   APPOINTMENT_STATUS_LABELS,
   GENDER_LABELS,
@@ -20,10 +23,12 @@ import {
   PATIENT_TEXT,
 } from "@/constants/patients";
 import { ROUTES } from "@/constants/routes";
+import { useForm } from "@/hooks/useForm";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { api } from "@/lib/api";
 import { downloadTextPdf } from "@/lib/downloadPdf";
-import { formatMoney, formatNumber, formatShortDate, formatTime } from "@/lib/format";
+import { formatMoney, formatNumber, formatShortDate, formatTime, takaToMinor, minorToTaka } from "@/lib/format";
+import TextField from "@/components/ui/TextField";
 import PatientFormDialog from "./PatientFormDialog";
 import PrescriptionFormDialog from "./PrescriptionFormDialog";
 import { usePatient } from "./usePatients";
@@ -76,6 +81,95 @@ function downloadPatientPdf(patient) {
     lines,
     filename: `${safeName}-record.pdf`,
   });
+}
+
+
+function RecordPaymentDialog({ open, patientId, onClose, onSaved }) {
+  const [invoice, setInvoice] = useState(null);
+  const [loadError, setLoadError] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const form = useForm({
+    initialValues: { amount: "", method: "cash", note: "", paidAt: "" },
+    validate: (v) => {
+      const e = {};
+      if (!v.amount || Number(v.amount) <= 0) e.amount = "Enter an amount.";
+      if (invoice) {
+        const due = minorToTaka(invoice.amountDue || 0);
+        if (due > 0 && Number(v.amount) > due) e.amount = "Amount exceeds balance due.";
+      }
+      return e;
+    },
+    onSubmit: async (values) => {
+      if (!invoice?.id) throw new Error("No invoice found for this patient.");
+      await api(API_ENDPOINTS.invoicePayments(invoice.id), {
+        method: HTTP_METHODS.POST,
+        body: {
+          amount: takaToMinor(values.amount),
+          method: values.method || "cash",
+          note: values.note?.trim() || "",
+          paidAt: values.paidAt || undefined,
+        },
+      });
+      onSaved?.();
+      onClose();
+    },
+  });
+
+  useEffect(() => {
+    if (!open || !patientId) return undefined;
+    setLoadError("");
+    setLoading(true);
+    setInvoice(null);
+    const c = new AbortController();
+    api(API_ENDPOINTS.INVOICES, { params: { patient: patientId, limit: 1 }, signal: c.signal })
+      .then((data) => {
+        const inv = (data.invoices || [])[0] || null;
+        setInvoice(inv);
+        if (!inv) setLoadError("No invoice found for this patient.");
+        else {
+          const due = minorToTaka(inv.amountDue || 0);
+          form.reset({ amount: due > 0 ? String(due) : "", method: "cash", note: "", paidAt: "" });
+        }
+      })
+      .catch((err) => {
+        if (err.name !== "AbortError") setLoadError(err.message || "Could not load invoice.");
+      })
+      .finally(() => {
+        if (!c.signal.aborted) setLoading(false);
+      });
+    return () => c.abort();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, patientId]);
+
+  if (!open) return null;
+
+  return (
+    <Dialog open={open} onClose={onClose} title={PATIENT_TEXT.RECORD_PAYMENT} className="max-w-md">
+      {loading && <p className="text-sm text-muted-foreground">Loading invoice…</p>}
+      {loadError && <FormError>{loadError}</FormError>}
+      {!loading && invoice && (
+        <form onSubmit={form.handleSubmit} className="space-y-4">
+          <p className="text-sm text-muted-foreground">
+            Invoice {invoice.invoiceNumber} · Due {formatMoney(invoice.amountDue || 0, CURRENCY)}
+          </p>
+          <TextField label="Amount" type="number" min={0} step="0.01" {...form.getFieldProps("amount")} />
+          <SelectField label="Method" options={PAYMENT_METHOD_OPTIONS} {...form.getFieldProps("method")} />
+          <DateField label="Payment date" {...form.getFieldProps("paidAt")} />
+          <TextField label="Note" {...form.getFieldProps("note")} />
+          {form.formError && <FormError>{form.formError}</FormError>}
+          <div className="flex justify-end gap-2">
+            <Button type="button" variant="secondary" onClick={onClose}>
+              Cancel
+            </Button>
+            <Button type="submit" loading={form.isSubmitting}>
+              {PATIENT_TEXT.RECORD_PAYMENT}
+            </Button>
+          </div>
+        </form>
+      )}
+    </Dialog>
+  );
 }
 
 function AssignDoctorDialog({ open, currentDoctorId, onSubmit, onClose }) {
@@ -237,8 +331,8 @@ export default function PatientDetailsPage() {
           </div>
         </div>
         <div className="flex flex-wrap gap-2">
-          <Button variant="secondary" onClick={() => downloadPatientPdf(patient)}>
-            <Printer /> {PATIENT_TEXT.PRINT}
+          <Button variant="secondary" onClick={() => setDialog({ type: "record_payment" })}>
+            {PATIENT_TEXT.RECORD_PAYMENT}
           </Button>
           <Button variant="secondary" onClick={() => setDialog({ type: PATIENT_DIALOGS.ADD_PRESCRIPTION })}>
             <Plus /> {PATIENT_TEXT.ADD_PRESCRIPTION}
@@ -420,30 +514,24 @@ export default function PatientDetailsPage() {
             <table className="w-full text-left text-sm">
               <thead>
                 <tr className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                  <th className="py-2 pr-3">Invoice</th>
                   <th className="py-2 pr-3">Amount</th>
-                  <th className="py-2 pr-3">Status</th>
-                  <th className="py-2">Date</th>
+                  <th className="py-2 pr-3">Method</th>
+                  <th className="py-2 pr-3">Note</th>
+                  <th className="py-2 pr-3">Date</th>
                 </tr>
               </thead>
               <tbody>
                 {payments.map((payment) => (
                   <tr key={payment.id} className="border-t border-border">
-                    <td className="py-2.5 pr-3 font-medium">{payment.number}</td>
-                    <td className="py-2.5 pr-3 tabular-nums">
-                      {formatMoney(payment.totalAmount, "BDT")}
+                    <td className="py-2.5 pr-3 font-medium tabular-nums">
+                      {formatMoney(payment.amount || 0, "BDT")}
                     </td>
-                    <td className="py-2.5 pr-3">
-                      <Badge tone={INVOICE_STATUS_TONES[payment.status] || "neutral"}>
-                        {INVOICE_STATUS_LABELS[payment.status] || payment.status}
-                      </Badge>
+                    <td className="py-2.5 pr-3 capitalize">
+                      {payment.method ? String(payment.method).replace(/_/g, " ") : "—"}
                     </td>
-                    <td className="py-2.5 text-muted-foreground">
-                      {payment.paidAt
-                        ? formatShortDate(payment.paidAt)
-                        : payment.createdAt
-                          ? formatShortDate(payment.createdAt)
-                          : "—"}
+                    <td className="py-2.5 pr-3 text-muted-foreground">{payment.note || "—"}</td>
+                    <td className="py-2.5 pr-3 tabular-nums text-muted-foreground">
+                      {payment.paidAt ? formatShortDate(payment.paidAt) : "—"}
                     </td>
                   </tr>
                 ))}
@@ -464,6 +552,15 @@ export default function PatientDetailsPage() {
         open={dialog.type === PATIENT_DIALOGS.ADD_PRESCRIPTION}
         onSubmit={handlePrescriptionSubmit}
         onClose={() => setDialog({ type: null })}
+      />
+      <RecordPaymentDialog
+        open={dialog.type === "record_payment"}
+        patientId={patient?.id}
+        onClose={() => setDialog({ type: null })}
+        onSaved={() => {
+          /* refresh patient */
+          reload();
+        }}
       />
 
       <AssignDoctorDialog

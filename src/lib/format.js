@@ -35,6 +35,16 @@ export function formatMoney(minorUnits, currency) {
   );
 }
 
+/** Form input (taka) → API integer minor units (poisha). */
+export function takaToMinor(value) {
+  return Math.round((Number(value) || 0) * CURRENCY_MINOR_UNIT);
+}
+
+/** API minor units → form display number in taka. */
+export function minorToTaka(value) {
+  return (Number(value) || 0) / CURRENCY_MINOR_UNIT;
+}
+
 export const formatTime = (iso) => timeFormat.format(new Date(iso));
 export const formatShortDate = (iso) => shortDateFormat.format(new Date(iso));
 export const formatLongDate = (date) => longDateFormat.format(date);

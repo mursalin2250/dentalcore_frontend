@@ -10,10 +10,11 @@ function escapeHtml(s) {
     .replace(/"/g, "&quot;");
 }
 
+
+
+
 /**
- * Professional print layout aligned with DentalCore theme tokens
- * (primary #6d4ae5, ink #14142b, muted #6e6e85, border #e8e8f0).
- * Always pass the latest form snapshot when printing from the generator.
+ * Invoice print layout. Always pass the latest form snapshot when printing from the generator.
  */
 export function buildInvoicePrintHtml(invoice) {
   const name = invoice.patientName || invoice.patient?.name || "—";
@@ -58,10 +59,8 @@ export function buildInvoicePrintHtml(invoice) {
 
   return `
   <div class="sheet">
-    <div class="accent-bar"></div>
     <header class="header">
       <div class="brand">
-        <div class="brand-mark">DC</div>
         <div>
           <div class="brand-name">${escapeHtml(clinicName)}</div>
           ${clinicContact ? `<div class="muted">${escapeHtml(clinicContact)}</div>` : ""}
@@ -82,8 +81,8 @@ export function buildInvoicePrintHtml(invoice) {
     <section class="bill-to">
       <div class="section-label">Bill to</div>
       <div class="bill-name">${escapeHtml(name)}</div>
-      ${phone ? `<div class="muted">${escapeHtml(phone)}</div>` : ""}
-      ${address ? `<div class="muted">${escapeHtml(address)}</div>` : ""}
+      ${phone ? `<div class="bill-detail">${escapeHtml(phone)}</div>` : ""}
+      ${address ? `<div class="bill-detail">${escapeHtml(address)}</div>` : ""}
     </section>
 
     <table class="items">
@@ -118,38 +117,35 @@ export function buildInvoicePrintHtml(invoice) {
           <td class="muted">Amount paid</td>
           <td class="num right">${formatMoney(amountPaid, CURRENCY)}</td>
         </tr>
-        <tr>
-          <td class="muted">Amount due</td>
+        <tr class="due-row">
+          <td>Amount due</td>
           <td class="num right">${formatMoney(amountDue, CURRENCY)}</td>
-        </tr>
-        <tr class="total-row">
-          <td>Total</td>
-          <td class="num right">${formatMoney(totalCost, CURRENCY)}</td>
         </tr>
       </table>
     </div>
 
     ${
       invoice.notes
-        ? `<section class="footer-block">
+        ? `<section class="notes-block">
       <div class="section-label">Notes</div>
       <div class="footer-text">${escapeHtml(invoice.notes)}</div>
     </section>`
         : ""
     }
-    ${
-      invoice.terms
-        ? `<section class="footer-block">
+
+    <div class="page-bottom">
+      ${
+        invoice.terms
+          ? `<section class="footer-block">
       <div class="section-label">Terms & conditions</div>
       <div class="footer-text">${escapeHtml(invoice.terms)}</div>
     </section>`
-        : ""
-    }
-
-    <footer class="page-foot">
-      <span>Thank you for choosing ${escapeHtml(clinicName)}</span>
-      <span class="muted">Generated with DentalCore</span>
-    </footer>
+          : ""
+      }
+      <footer class="page-foot">
+        <span>Thank you for choosing ${escapeHtml(clinicName)}</span>
+      </footer>
+    </div>
   </div>`;
 }
 
@@ -157,79 +153,71 @@ const PRINT_CSS = `
   * { box-sizing: border-box; }
   body {
     margin: 0;
-    background: #f6f6f9;
+    background: #fff;
     color: #14142b;
     font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
   }
   .sheet {
-    position: relative;
     max-width: 800px;
-    margin: 24px auto;
-    padding: 40px 44px 32px;
+    margin: 0 auto;
+    padding: 28px 32px 20px;
     background: #ffffff;
-    border: 1px solid #e8e8f0;
-    border-radius: 16px;
-    box-shadow: 0 8px 30px rgba(20, 20, 43, 0.06);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
   }
-  .accent-bar {
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    height: 6px;
-    background: linear-gradient(90deg, #6d4ae5, #8b6cf0);
-    border-radius: 16px 16px 0 0;
+  .page-bottom {
+    margin-top: auto;
+    padding-top: 24px;
   }
+  .notes-block { margin-top: 24px; }
   .header {
     display: flex;
     justify-content: space-between;
     gap: 24px;
     align-items: flex-start;
-    margin-bottom: 32px;
-  }
-  .brand { display: flex; gap: 14px; align-items: flex-start; }
-  .brand-mark {
-    width: 44px; height: 44px;
-    border-radius: 12px;
-    background: #6d4ae5;
-    color: #fff;
-    font-weight: 700;
-    font-size: 14px;
-    display: flex; align-items: center; justify-content: center;
-    flex-shrink: 0;
+    margin-bottom: 28px;
   }
   .brand-name { font-size: 18px; font-weight: 700; letter-spacing: -0.02em; }
   .title-block { text-align: right; }
   .doc-title {
-    font-size: 28px;
+    font-size: 26px;
     font-weight: 700;
     letter-spacing: 0.06em;
     color: #14142b;
-    margin-bottom: 10px;
+    margin-bottom: 8px;
   }
   .meta { font-size: 13px; line-height: 1.7; }
   .meta strong { font-variant-numeric: tabular-nums; }
   .muted { color: #6e6e85; }
+
   .bill-to {
-    background: #f2eefe;
-    border: 1px solid #e8e8f0;
-    border-radius: 12px;
-    padding: 16px 18px;
-    margin-bottom: 28px;
+    margin-bottom: 24px;
+    padding: 0;
+    background: none;
+    border: none;
   }
   .section-label {
-    font-size: 11px;
+    font-size: 12px;
     font-weight: 600;
     letter-spacing: 0.08em;
     text-transform: uppercase;
-    color: #6d4ae5;
+    color: #6e6e85;
     margin-bottom: 6px;
   }
-  .bill-name { font-size: 16px; font-weight: 600; }
+  .bill-name { font-size: 17px; font-weight: 600; line-height: 1.4; }
+  .bill-detail { font-size: 14px; color: #4a4a5c; line-height: 1.5; margin-top: 2px; }
+
   .items {
     width: 100%;
-    border-collapse: collapse;
+    border-collapse: separate;
+    border-spacing: 0;
     font-size: 14px;
+    border: 1px solid #c8c8d4;
+    border-radius: 4px;
+    overflow: hidden;
   }
   .items thead th {
     background: #14142b;
@@ -240,55 +228,67 @@ const PRINT_CSS = `
     font-size: 12px;
     letter-spacing: 0.04em;
     text-transform: uppercase;
+    border: 1px solid #14142b;
+    border-radius: 0;
   }
-  .items thead th:first-child { border-radius: 10px 0 0 0; }
-  .items thead th:last-child { border-radius: 0 10px 0 0; }
+  .items thead th:first-child { border-top-left-radius: 4px; }
+  .items thead th:last-child { border-top-right-radius: 4px; }
+  .items tbody tr:last-child .cell:first-child { border-bottom-left-radius: 4px; }
+  .items tbody tr:last-child .cell:last-child { border-bottom-right-radius: 4px; }
+  .items thead th.right { text-align: right; }
   .items .cell {
-    padding: 16px 16px;
-    border-bottom: 1px solid #e8e8f0;
+    padding: 16px;
+    border: 1px solid #c8c8d4;
     vertical-align: middle;
     line-height: 1.45;
+    font-size: 14px;
   }
-  .items tbody tr:last-child .cell { border-bottom: none; }
-  .items tbody tr:nth-child(even) .cell { background: #fafafc; }
   .num { font-variant-numeric: tabular-nums; }
   .right { text-align: right; }
+
   .summary-wrap { display: flex; justify-content: flex-end; margin-top: 20px; }
-  .summary { width: 280px; font-size: 14px; border-collapse: collapse; }
+  .summary { width: 280px; font-size: 14px; border-collapse: collapse; margin-left: auto; }
   .summary td { padding: 8px 0; }
-  .summary .total-row td {
+  .summary td:last-child { text-align: right; font-variant-numeric: tabular-nums; }
+  .summary .due-row td {
     padding-top: 12px;
-    margin-top: 4px;
     border-top: 2px solid #14142b;
     font-weight: 700;
     font-size: 15px;
   }
-  .footer-block { margin-top: 28px; }
+  .summary .due-row td:last-child { text-align: right; }
+
+  .footer-block { margin-bottom: 12px; }
   .footer-text { font-size: 13px; line-height: 1.5; white-space: pre-wrap; }
+
   .page-foot {
-    margin-top: 36px;
-    padding-top: 16px;
+    margin-top: 0;
+    padding-top: 12px;
+    padding-bottom: 4px;
     border-top: 1px solid #e8e8f0;
-    display: flex;
-    justify-content: space-between;
-    gap: 12px;
-    font-size: 12px;
+    font-size: 13px;
     color: #14142b;
   }
+
   @media print {
-    body { background: #fff; }
+    /* Zero page margin hides Chrome/Edge URL + date headers/footers */
+    @page { margin: 0; size: auto; }
+    body {
+      background: #fff;
+      padding: 14mm 12mm 12mm;
+    }
     .sheet {
       margin: 0;
       max-width: none;
-      border: none;
-      border-radius: 0;
-      box-shadow: none;
-      padding: 28px 32px;
+      padding: 0;
+      min-height: calc(100vh - 26mm);
     }
-    .accent-bar { border-radius: 0; }
-    .items thead th { background: #14142b !important; color: #fff !important; }
-    .bill-to { background: #f2eefe !important; }
-    .items tbody tr:nth-child(even) .cell { background: #fafafc !important; }
+    .items thead th {
+      background: #14142b !important;
+      color: #fff !important;
+      border-color: #14142b !important;
+    }
+    .items, .items .cell { border-color: #c8c8d4 !important; }
   }
 `;
 
@@ -311,8 +311,9 @@ export function printInvoiceHtml(title, innerHtml) {
     return;
   }
 
+  // Blank document title so the browser does not print "Draft | DentalCore" in the header.
   doc.open();
-  doc.write(`<!DOCTYPE html><html><head><meta charset="utf-8"/><title>${escapeHtml(title)}</title>
+  doc.write(`<!DOCTYPE html><html><head><meta charset="utf-8"/><title></title>
     <style>${PRINT_CSS}</style></head><body>${innerHtml}</body></html>`);
   doc.close();
 
@@ -327,8 +328,5 @@ export function printInvoiceHtml(title, innerHtml) {
 }
 
 export function printInvoice(invoice) {
-  printInvoiceHtml(
-    `${invoice.invoiceNumber || "Invoice"} | DentalCore`,
-    buildInvoicePrintHtml(invoice),
-  );
+  printInvoiceHtml("", buildInvoicePrintHtml(invoice));
 }

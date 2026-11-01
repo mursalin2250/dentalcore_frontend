@@ -16,11 +16,13 @@ import InvoicePage from "@/features/invoice/InvoicePage";
 import InvoiceGeneratorPage from "@/features/invoice/InvoiceGeneratorPage";
 import AnalyticsPage from "@/features/analytics/AnalyticsPage";
 import StaffPage from "@/features/staff/StaffPage";
+import StaffDetailsPage from "@/features/staff/StaffDetailsPage";
 import TeamPage from "@/features/team/TeamPage";
 import SettingsPage from "@/features/settings/SettingsPage";
 import ProfilePage from "@/features/account/ProfilePage";
 import AccountSettingsPage from "@/features/account/AccountSettingsPage";
 import NotFoundPage from "@/features/not-found/NotFoundPage";
+import RouteErrorPage from "@/features/not-found/RouteErrorPage";
 
 export const routes = [
   {
@@ -36,6 +38,7 @@ export const routes = [
       {
         path: ROUTES.ROOT,
         element: <AppShell />,
+        errorElement: <RouteErrorPage />,
         children: [
           { index: true, element: <Navigate to={ROUTES.DASHBOARD} replace /> },
           { path: ROUTES.DASHBOARD, element: <DashboardPage /> },
@@ -51,6 +54,7 @@ export const routes = [
           { path: ROUTES.INVOICE_EDIT, element: <InvoiceGeneratorPage /> },
           { path: ROUTES.ANALYTICS, element: <AnalyticsPage /> },
           { path: ROUTES.STAFF, element: <StaffPage /> },
+          { path: ROUTES.STAFF_DETAILS, element: <StaffDetailsPage /> },
           { path: ROUTES.TEAM, element: <TeamPage /> },
           { path: ROUTES.SETTINGS, element: <SettingsPage /> },
           { path: ROUTES.PROFILE, element: <ProfilePage /> },
